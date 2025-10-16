@@ -31,9 +31,12 @@ export default function AdminLogin() {
       })
 
       const data = await response.json()
+      console.log('Login response:', data)
 
       if (data.success) {
-        router.push('/admin/dashboard')
+        console.log('Login successful, redirecting to dashboard...')
+        // Use window.location for more reliable redirect
+        window.location.href = '/admin/dashboard'
       } else {
         setError(data.error || 'Login failed')
       }
