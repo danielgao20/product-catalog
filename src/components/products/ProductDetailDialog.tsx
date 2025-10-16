@@ -21,10 +21,16 @@ interface ProductDetailDialogProps {
 export function ProductDetailDialog({ product, isOpen, onClose }: ProductDetailDialogProps) {
   const { addToCart } = useCart()
   const [quantity, setQuantity] = useState(1)
+  const [isAddingToCart, setIsAddingToCart] = useState(false)
 
-  const handleAddToCart = () => {
-    addToCart(product, quantity)
-    onClose()
+  const handleAddToCart = async () => {
+    setIsAddingToCart(true)
+    await addToCart(product, quantity)
+    // Reset animation after a brief delay
+    setTimeout(() => {
+      setIsAddingToCart(false)
+      onClose()
+    }, 600)
   }
 
   // Get child products for bundles
@@ -198,12 +204,12 @@ export function ProductDetailDialog({ product, isOpen, onClose }: ProductDetailD
 
               <Button 
                 onClick={handleAddToCart}
-                className="w-full"
+                className={`w-full transition-all duration-300 ${isAddingToCart ? 'scale-95 bg-green-600 hover:bg-green-700' : ''}`}
                 size="lg"
-                disabled={!product.inStock}
+                disabled={!product.inStock || isAddingToCart}
               >
-                <ShoppingCart className="mr-2 h-4 w-4" />
-                Add {quantity} to Cart
+                <ShoppingCart className={`mr-2 h-4 w-4 transition-transform duration-300 ${isAddingToCart ? 'scale-110' : ''}`} />
+                {isAddingToCart ? 'Added!' : `Add ${quantity} to Cart`}
               </Button>
             </div>
           </div>

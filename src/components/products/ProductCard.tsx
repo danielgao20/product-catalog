@@ -18,10 +18,14 @@ interface ProductCardProps {
 export function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useCart()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isAddingToCart, setIsAddingToCart] = useState(false)
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  const handleAddToCart = async (e: React.MouseEvent) => {
     e.stopPropagation()
-    addToCart(product)
+    setIsAddingToCart(true)
+    await addToCart(product)
+    // Reset animation after a brief delay
+    setTimeout(() => setIsAddingToCart(false), 600)
   }
 
   const handleCardClick = () => {
@@ -74,10 +78,11 @@ export function ProductCard({ product }: ProductCardProps) {
         <CardFooter className="p-4 pt-0">
           <Button 
             onClick={handleAddToCart}
-            className="w-full"
+            className={`w-full transition-all duration-300 ${isAddingToCart ? 'scale-95 bg-green-600 hover:bg-green-700' : ''}`}
+            disabled={isAddingToCart}
           >
-            <ShoppingCart className="mr-2 h-4 w-4" />
-            Add to Cart
+            <ShoppingCart className={`mr-2 h-4 w-4 transition-transform duration-300 ${isAddingToCart ? 'scale-110' : ''}`} />
+            {isAddingToCart ? 'Added!' : 'Add to Cart'}
           </Button>
         </CardFooter>
       </Card>
