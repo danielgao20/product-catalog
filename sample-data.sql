@@ -1,0 +1,23 @@
+-- Insert sample products
+INSERT INTO products (id, name, description, price, image_url, is_bundle, details, features, in_stock, stock_count) VALUES
+('550e8400-e29b-41d4-a716-446655440001', 'Wireless Headphones', 'High-quality wireless headphones with noise cancellation', 199.99, 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=300&fit=crop', false, 'Experience premium audio quality with our advanced wireless headphones. Featuring active noise cancellation technology, these headphones provide crystal-clear sound in any environment. Perfect for music lovers, professionals, and anyone who values superior audio quality.', ARRAY['Wireless freedom', 'Premium sound quality', 'Comfortable over-ear design', 'Built-in microphone', 'Multi-device connectivity'], true, 25),
+
+('550e8400-e29b-41d4-a716-446655440002', 'Smartphone', 'Latest generation smartphone with advanced camera system', 899.99, 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=300&fit=crop', false, 'The ultimate smartphone experience with cutting-edge technology. Featuring a professional-grade camera system, lightning-fast performance, and all-day battery life. Built with premium materials and designed for the modern lifestyle.', ARRAY['Professional photography', '5G ready', 'All-day battery', 'Water resistant', 'Wireless charging'], true, 15),
+
+('550e8400-e29b-41d4-a716-446655440003', 'Laptop', 'Powerful laptop for work and gaming', 1299.99, 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=300&fit=crop', false, 'A high-performance laptop designed for both productivity and entertainment. With powerful processing capabilities and stunning graphics, this laptop handles everything from intensive work tasks to the latest games with ease.', ARRAY['High-performance computing', 'Gaming ready', 'Portable design', 'Fast charging', 'Multiple ports'], true, 8),
+
+('550e8400-e29b-41d4-a716-446655440004', 'Phone Case', 'Protective case for your smartphone', 29.99, 'https://images.unsplash.com/photo-1556656793-08538906a9f8?w=400&h=300&fit=crop', false, 'Keep your smartphone safe with our premium protective case. Made from high-quality materials, this case provides excellent protection against drops, scratches, and daily wear while maintaining easy access to all ports and buttons.', ARRAY['Drop protection', 'Scratch resistant', 'Slim profile', 'Easy installation', 'Premium materials'], true, 50),
+
+('550e8400-e29b-41d4-a716-446655440005', 'Screen Protector', 'Tempered glass screen protector', 19.99, 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=300&fit=crop&q=80', false, 'Crystal-clear protection for your device screen. Our tempered glass screen protector offers superior clarity and touch sensitivity while providing excellent protection against scratches, cracks, and impacts.', ARRAY['Crystal clear', 'Touch sensitive', 'Easy to install', 'Bubble-free', 'Long-lasting'], true, 75),
+
+('550e8400-e29b-41d4-a716-446655440006', 'Mobile Accessories Bundle', 'Complete mobile accessories package', 49.97, 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=300&fit=crop&q=80', true, 'Get everything you need to protect your smartphone with this essential accessories bundle. Includes a premium protective case and tempered glass screen protector, saving you money while keeping your device safe.', ARRAY['Complete protection', 'Cost savings', 'Easy setup', 'Premium quality'], true, 30),
+
+('550e8400-e29b-41d4-a716-446655440007', 'Tech Starter Pack', 'Everything you need to get started with your new devices', 1149.97, 'https://images.unsplash.com/photo-1556742111-a301076d9d18?w=400&h=300&fit=crop&q=80', true, 'The ultimate tech starter bundle for the modern user. This comprehensive package includes wireless headphones for premium audio, a protective phone case, and a screen protector. Perfect for anyone setting up their new devices or upgrading their tech accessories.', ARRAY['Complete tech setup', 'Premium audio', 'Device protection', 'Great value'], true, 12);
+
+-- Insert bundle relationships
+INSERT INTO bundle_products (bundle_id, child_product_id, quantity_ratio) VALUES
+('550e8400-e29b-41d4-a716-446655440006', '550e8400-e29b-41d4-a716-446655440004', 1.0),
+('550e8400-e29b-41d4-a716-446655440006', '550e8400-e29b-41d4-a716-446655440005', 1.0),
+('550e8400-e29b-41d4-a716-446655440007', '550e8400-e29b-41d4-a716-446655440001', 1.0),
+('550e8400-e29b-41d4-a716-446655440007', '550e8400-e29b-41d4-a716-446655440004', 1.0),
+('550e8400-e29b-41d4-a716-446655440007', '550e8400-e29b-41d4-a716-446655440005', 1.0);
