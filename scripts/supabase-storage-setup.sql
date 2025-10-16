@@ -1,5 +1,12 @@
--- Create storage bucket for product images
-INSERT INTO storage.buckets (id, name, public) VALUES ('product-images', 'product-images', true);
+-- Create storage bucket for product images (if it doesn't exist)
+INSERT INTO storage.buckets (id, name, public) VALUES ('product-images', 'product-images', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Public Access" ON storage.objects;
+DROP POLICY IF EXISTS "Allow image uploads" ON storage.objects;
+DROP POLICY IF EXISTS "Allow image updates" ON storage.objects;
+DROP POLICY IF EXISTS "Allow image deletes" ON storage.objects;
 
 -- Create policy to allow public access to product images
 CREATE POLICY "Public Access" ON storage.objects FOR SELECT USING (bucket_id = 'product-images');

@@ -48,18 +48,28 @@ A modern, full-stack e-commerce application built with Next.js, React, TypeScrip
    ```env
    NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+   JWT_SECRET=your_jwt_secret
    ```
 
 4. **Set up the database**
    - Create a new Supabase project
-   - Run the SQL scripts in order:
+   - Run the SQL scripts in the `scripts/` folder in order:
      ```bash
-   # 1. Create database schema
-   psql -h your-db-host -U postgres -d postgres -f database-schema.sql
+   # 1. Core database schema
+   # Run scripts/database-schema.sql in Supabase SQL Editor
    
-   # 2. Insert sample data
-   psql -h your-db-host -U postgres -d postgres -f sample-data.sql
+   # 2. Sample data
+   # Run scripts/sample-data.sql in Supabase SQL Editor
+   
+   # 3. Admin authentication
+   # Run scripts/admin-schema.sql in Supabase SQL Editor
+   
+   # 4. File storage setup
+   # Run scripts/supabase-storage-setup.sql in Supabase SQL Editor
    ```
+   
+   See `scripts/README.md` for detailed setup instructions.
 
 5. **Start the development server**
    ```bash
