@@ -1,93 +1,106 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { 
-  Package, 
-  ShoppingCart, 
-  Users, 
-  TrendingUp,
-  Plus,
-  Eye
-} from 'lucide-react'
-import Link from 'next/link'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Badge } from '@/components/ui/badge'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Plus, Edit, Trash2, Package, DollarSign, Hash, Search } from 'lucide-react'
+import { Product } from '@/lib/types'
 
-interface DashboardStats {
-  totalProducts: number
-  totalBundles: number
-  totalOrders: number
-  lowStockItems: number
-}
-
-export default function AdminDashboard() {
-  const [stats, setStats] = useState<DashboardStats>({
-    totalProducts: 0,
-    totalBundles: 0,
-    totalOrders: 0,
-    lowStockItems: 0
-  })
+export default function AdminDashboardPage() {
+  const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [showBundlesOnly, setShowBundlesOnly] = useState(false)
+  const [showLowStockOnly, setShowLowStockOnly] = useState(false)
 
   useEffect(() => {
-    // Fetch dashboard statistics
-    const fetchStats = async () => {
-      try {
-        // For now, we'll use mock data. In a real app, you'd fetch from your API
-        setStats({
-          totalProducts: 7,
-          totalBundles: 2,
-          totalOrders: 0, // We don't have orders yet
-          lowStockItems: 1
-        })
-      } catch (error) {
-        console.error('Error fetching stats:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchStats()
+    fetchProducts()
   }, [])
 
-  const statCards = [
-    {
-      title: 'Total Products',
-      value: stats.totalProducts,
-      description: 'Individual products in catalog',
-      icon: Package,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      href: '/admin/products'
-    },
-    {
-      title: 'Product Bundles',
-      value: stats.totalBundles,
-      description: 'Bundle packages available',
-      icon: ShoppingCart,
-      color: 'text-green-600',
-      bgColor: 'bg-green-50',
-      href: '/admin/bundles'
-    },
-    {
-      title: 'Total Orders',
-      value: stats.totalOrders,
-      description: 'Orders placed (coming soon)',
-      icon: TrendingUp,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50',
-      href: '/admin/orders'
-    },
-    {
-      title: 'Low Stock Items',
-      value: stats.lowStockItems,
-      description: 'Items needing restock',
-      icon: Users,
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-50',
-      href: '/admin/inventory'
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch('/api/admin/products')
+      const data = await response.json()
+      if (data.success) {
+        setProducts(data.products)
+      }
+    } catch (error) {
+      console.error('Error fetching products:', error)
+    } finally {
+      setLoading(false)
     }
-  ]
+  }
+
+  const handleSaveProduct = async (productData: Partial<Product>) => {
+    try {
+      const url = editingProduct ? `/api/admin/products/${editingProduct.id}` : '/api/admin/products'
+      const method = editingProduct ? 'PUT' : 'POST'
+      
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(productData)
+      })
+      
+      const data = await response.json()
+      if (data.success) {
+        await fetchProducts()
+        setIsDialogOpen(false)
+        setEditingProduct(null)
+      }
+    } catch (error) {
+      console.error('Error saving product:', error)
+    }
+  }
+
+  const handleDeleteProduct = async (productId: string) => {
+    if (!confirm('Are you sure you want to delete this product?')) return
+    
+    try {
+      const response = await fetch(`/api/admin/products/${productId}`, {
+        method: 'DELETE'
+      })
+      
+      const data = await response.json()
+      if (data.success) {
+        await fetchProducts()
+      }
+    } catch (error) {
+      console.error('Error deleting product:', error)
+    }
+  }
+
+  const openEditDialog = (product: Product) => {
+    setEditingProduct(product)
+    setIsDialogOpen(true)
+  }
+
+  const openCreateDialog = () => {
+    setEditingProduct(null)
+    setIsDialogOpen(true)
+  }
+
+  // Filter products
+  const filteredProducts = products.filter(product => {
+    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         product.description.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesBundleFilter = !showBundlesOnly || product.isBundle
+    const matchesLowStockFilter = !showLowStockOnly || (product.stockCount || 0) <= 5
+    return matchesSearch && matchesBundleFilter && matchesLowStockFilter
+  })
+
+  // Calculate inventory stats
+  const totalProducts = products.length
+  const totalStock = products.reduce((sum, product) => sum + (product.stockCount || 0), 0)
+  const lowStockProducts = products.filter(product => (product.stockCount || 0) <= 5 && (product.stockCount || 0) > 0).length
+  const outOfStockProducts = products.filter(product => (product.stockCount || 0) === 0).length
 
   if (loading) {
     return (
@@ -99,107 +112,434 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600">Welcome to your admin panel</p>
-        </div>
-        <div className="flex gap-3">
-          <Button asChild>
-            <Link href="/admin/products/new">
-              <Plus className="mr-2 h-4 w-4" />
-              Add Product
-            </Link>
-          </Button>
-          <Button variant="outline" asChild>
-            <Link href="/">
-              <Eye className="mr-2 h-4 w-4" />
-              View Store
-            </Link>
-          </Button>
-        </div>
-      </div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {statCards.map((stat) => (
-          <Card key={stat.title} className="hover:shadow-md transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">
-                {stat.title}
-              </CardTitle>
-              <div className={`p-2 rounded-full ${stat.bgColor}`}>
-                <stat.icon className={`h-4 w-4 ${stat.color}`} />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-              <p className="text-xs text-gray-500 mt-1">
-                {stat.description}
-              </p>
-              {stat.href && (
-                <Button variant="ghost" size="sm" className="mt-2 p-0 h-auto" asChild>
-                  <Link href={stat.href}>
-                    View details →
-                  </Link>
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      {/* Inventory Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>
-              Common administrative tasks
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <Button variant="outline" className="w-full justify-start" asChild>
-              <Link href="/admin/products/new">
-                <Plus className="mr-2 h-4 w-4" />
-                Add New Product
-              </Link>
-            </Button>
-            <Button variant="outline" className="w-full justify-start" asChild>
-              <Link href="/admin/bundles/new">
-                <Plus className="mr-2 h-4 w-4" />
-                Create Bundle
-              </Link>
-            </Button>
-            <Button variant="outline" className="w-full justify-start" asChild>
-              <Link href="/admin/inventory">
-                <Package className="mr-2 h-4 w-4" />
-                Manage Inventory
-              </Link>
-            </Button>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Items</p>
+                <p className="text-2xl font-bold text-gray-900">{totalProducts}</p>
+              </div>
+              <Package className="h-8 w-8 text-gray-400" />
+            </div>
           </CardContent>
         </Card>
-
         <Card>
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>
-              Latest changes and updates
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="text-sm text-gray-500">
-                No recent activity to display
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Stock</p>
+                <p className="text-2xl font-bold text-gray-900">{totalStock}</p>
               </div>
-              <p className="text-xs text-gray-400">
-                Activity tracking will be available once you start managing products
-              </p>
+              <Hash className="h-8 w-8 text-gray-400" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Low Stock</p>
+                <p className="text-2xl font-bold text-amber-600">{lowStockProducts}</p>
+              </div>
+              <div className="h-8 w-8 rounded-full bg-amber-100 flex items-center justify-center">
+                <span className="text-amber-600 text-sm font-bold">!</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Out of Stock</p>
+                <p className="text-2xl font-bold text-red-600">{outOfStockProducts}</p>
+              </div>
+              <div className="h-8 w-8 rounded-full bg-red-100 flex items-center justify-center">
+                <span className="text-red-600 text-sm font-bold">×</span>
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* Search and Filters */}
+      <div className="mb-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search products..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="bundles-only"
+                checked={showBundlesOnly}
+                onChange={(e) => setShowBundlesOnly(e.target.checked)}
+                className="h-4 w-4 rounded border border-input"
+              />
+              <label htmlFor="bundles-only" className="text-sm font-medium leading-none">
+                Bundles only
+              </label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="low-stock-only"
+                checked={showLowStockOnly}
+                onChange={(e) => setShowLowStockOnly(e.target.checked)}
+                className="h-4 w-4 rounded border border-input"
+              />
+              <label htmlFor="low-stock-only" className="text-sm font-medium leading-none">
+                Low stock
+              </label>
+            </div>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button onClick={openCreateDialog}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Product
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingProduct ? 'Edit Product' : 'Add New Product'}
+                  </DialogTitle>
+                </DialogHeader>
+                <ProductForm 
+                  product={editingProduct} 
+                  onSave={handleSaveProduct}
+                  onCancel={() => {
+                    setIsDialogOpen(false)
+                    setEditingProduct(null)
+                  }}
+                />
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+      </div>
+
+      {/* Products Grid */}
+      <div>
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold tracking-tight">
+            Products
+          </h2>
+          <p className="text-muted-foreground">
+            {loading ? 'Loading...' : `${filteredProducts.length} ${filteredProducts.length === 1 ? 'item' : 'items'} found`}
+          </p>
+        </div>
+        {loading ? (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="h-80 bg-muted animate-pulse rounded-lg" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {filteredProducts.map((product) => (
+              <Card key={product.id} className="relative">
+                <CardHeader className="pb-3">
+                  <div className="flex justify-between items-start">
+                    <CardTitle className="text-lg">{product.name}</CardTitle>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => openEditDialog(product)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteProduct(product.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  {product.isBundle && (
+                    <Badge variant="secondary">Bundle</Badge>
+                  )}
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {product.imageUrl && (
+                    <div className="aspect-video bg-gray-100 rounded-md overflow-hidden relative group">
+                      <img 
+                        src={product.imageUrl} 
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              // TODO: Add image edit functionality
+                            }}
+                          >
+                            Edit Image
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <DollarSign className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">${product.price}</span>
+                      </div>
+                      <Badge variant={(product.stockCount || 0) > 10 ? "default" : (product.stockCount || 0) > 0 ? "secondary" : "destructive"}>
+                        {product.stockCount || 0} in stock
+                      </Badge>
+                    </div>
+                    {(product.stockCount || 0) <= 5 && (product.stockCount || 0) > 0 && (
+                      <div className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded">
+                        Low stock warning
+                      </div>
+                    )}
+                    {(product.stockCount || 0) === 0 && (
+                      <div className="text-xs text-red-600 bg-red-50 px-2 py-1 rounded">
+                        Out of stock
+                      </div>
+                    )}
+                  </div>
+                  {product.description && (
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {product.description}
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
+  )
+}
+
+function ProductForm({ 
+  product, 
+  onSave, 
+  onCancel 
+}: { 
+  product: Product | null
+  onSave: (data: Partial<Product>) => void
+  onCancel: () => void
+}) {
+  const [formData, setFormData] = useState({
+    name: product?.name || '',
+    description: product?.description || '',
+    price: product?.price || 0,
+    imageUrl: product?.imageUrl || '',
+    stockCount: product?.stockCount || 0,
+    inStock: product?.inStock ?? true,
+    isBundle: product?.isBundle || false,
+    details: product?.details || '',
+    features: product?.features?.join(', ') || ''
+  })
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+
+  const handleFileUpload = async (file: File) => {
+    setIsUploading(true)
+    setUploadError(null)
+
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const response = await fetch('/api/admin/upload', {
+        method: 'POST',
+        body: formData
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        setFormData(prev => ({ ...prev, imageUrl: data.url }))
+      } else {
+        setUploadError(data.error || 'Upload failed')
+      }
+    } catch {
+      setUploadError('Upload failed. Please try again.')
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    onSave({
+      ...formData,
+      features: formData.features ? formData.features.split(',').map(f => f.trim()) : []
+    })
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="name">Product Name</Label>
+          <Input
+            id="name"
+            value={formData.name}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, name: e.target.value })}
+            required
+          />
+        </div>
+        <div>
+          <Label htmlFor="price">Price ($)</Label>
+          <Input
+            id="price"
+            type="number"
+            step="0.01"
+            value={formData.price}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
+            required
+          />
+        </div>
+      </div>
+
+      <div>
+        <Label htmlFor="description">Description</Label>
+        <Textarea
+          id="description"
+          value={formData.description}
+          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          rows={3}
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="imageUrl">Product Image</Label>
+        <div className="space-y-3">
+          <div className="flex gap-2">
+            <Input
+              id="imageUrl"
+              placeholder="Enter image URL"
+              value={formData.imageUrl}
+              onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+              className="flex-1"
+            />
+            <input
+              type="file"
+              id="file-upload"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (file) {
+                  handleFileUpload(file)
+                }
+              }}
+              className="hidden"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => document.getElementById('file-upload')?.click()}
+              disabled={isUploading}
+            >
+              {isUploading ? 'Uploading...' : 'Upload'}
+            </Button>
+          </div>
+          
+          {uploadError && (
+            <div className="text-sm text-red-600 bg-red-50 px-2 py-1 rounded">
+              {uploadError}
+            </div>
+          )}
+          
+          {formData.imageUrl && (
+            <div className="relative">
+              <div className="aspect-video bg-gray-100 rounded-md overflow-hidden">
+                <img 
+                  src={formData.imageUrl} 
+                  alt="Product preview"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="absolute top-2 right-2"
+                onClick={() => setFormData({ ...formData, imageUrl: '' })}
+              >
+                Remove
+              </Button>
+            </div>
+          )}
+          <div className="text-xs text-gray-500">
+            Upload an image file (JPG, PNG, WebP) or enter an image URL. Max file size: 5MB
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="stockCount">Stock Count</Label>
+          <Input
+            id="stockCount"
+            type="number"
+            value={formData.stockCount}
+            onChange={(e) => setFormData({ ...formData, stockCount: parseInt(e.target.value) })}
+          />
+        </div>
+        <div className="flex items-center space-x-2 pt-6">
+          <input
+            type="checkbox"
+            id="inStock"
+            checked={formData.inStock}
+            onChange={(e) => setFormData({ ...formData, inStock: e.target.checked })}
+            className="rounded"
+          />
+          <Label htmlFor="inStock">In Stock</Label>
+        </div>
+      </div>
+
+      <div>
+        <Label htmlFor="details">Details</Label>
+        <Textarea
+          id="details"
+          value={formData.details}
+          onChange={(e) => setFormData({ ...formData, details: e.target.value })}
+          rows={2}
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="features">Features (comma-separated)</Label>
+        <Input
+          id="features"
+          value={formData.features}
+          onChange={(e) => setFormData({ ...formData, features: e.target.value })}
+          placeholder="Feature 1, Feature 2, Feature 3"
+        />
+      </div>
+
+      <div className="flex justify-end gap-2 pt-4">
+        <Button type="button" variant="outline" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button type="submit">
+          {product ? 'Update Product' : 'Create Product'}
+        </Button>
+      </div>
+    </form>
   )
 }

@@ -13,20 +13,32 @@ export async function getProducts(): Promise<Product[]> {
     return []
   }
 
-  return data.map(product => ({
-    id: product.id,
-    name: product.name,
-    description: product.description,
-    price: product.price,
-    imageUrl: product.image_url,
-    isBundle: product.is_bundle,
-    createdAt: new Date(product.created_at),
-    updatedAt: new Date(product.updated_at),
-    details: product.details,
-    features: product.features,
-    inStock: product.in_stock,
-    stockCount: product.stock_count,
+  // Map products and calculate bundle stock
+  const products = await Promise.all(data.map(async (product) => {
+    let stockCount = product.stock_count
+    
+    // For bundles, calculate stock based on child products
+    if (product.is_bundle) {
+      stockCount = await calculateBundleStock(product.id)
+    }
+    
+    return {
+      id: product.id,
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      imageUrl: product.image_url,
+      isBundle: product.is_bundle,
+      createdAt: new Date(product.created_at),
+      updatedAt: new Date(product.updated_at),
+      details: product.details,
+      features: product.features,
+      inStock: product.in_stock,
+      stockCount: stockCount,
+    }
   }))
+
+  return products
 }
 
 export async function getProduct(id: string): Promise<Product | null> {
@@ -41,6 +53,13 @@ export async function getProduct(id: string): Promise<Product | null> {
     return null
   }
 
+  let stockCount = data.stock_count
+  
+  // For bundles, calculate stock based on child products
+  if (data.is_bundle) {
+    stockCount = await calculateBundleStock(data.id)
+  }
+
   return {
     id: data.id,
     name: data.name,
@@ -53,7 +72,7 @@ export async function getProduct(id: string): Promise<Product | null> {
     details: data.details,
     features: data.features,
     inStock: data.in_stock,
-    stockCount: data.stock_count,
+    stockCount: stockCount,
   }
 }
 
@@ -73,6 +92,26 @@ export async function getBundleProducts(bundleId: string) {
   }
 
   return data
+}
+
+// Calculate bundle stock based on minimum stock of child products
+export async function calculateBundleStock(bundleId: string): Promise<number> {
+  const bundleProducts = await getBundleProducts(bundleId)
+  
+  if (bundleProducts.length === 0) {
+    return 0
+  }
+
+  // Calculate the minimum stock considering quantity ratios
+  const minStock = Math.min(
+    ...bundleProducts.map(bp => {
+      const childStock = bp.child_product?.stock_count || 0
+      const ratio = bp.quantity_ratio || 1
+      return Math.floor(childStock / ratio)
+    })
+  )
+
+  return Math.max(0, minStock)
 }
 
 // Cart items
