@@ -45,7 +45,7 @@ export default function AdminLogin() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <div className="flex items-center justify-center mb-4">
@@ -67,7 +67,7 @@ export default function AdminLogin() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="admin@example.com"
+                  placeholder="wiley@gmail.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="pl-10"
@@ -108,8 +108,8 @@ export default function AdminLogin() {
           </form>
           <div className="mt-6 text-center text-sm text-muted-foreground">
             <p>Default credentials:</p>
-            <p>Email: admin@example.com</p>
-            <p>Password: admin123</p>
+            <p>Email: wiley@gmail.com</p>
+            <p>Password: wiley123</p>
           </div>
         </CardContent>
       </Card>

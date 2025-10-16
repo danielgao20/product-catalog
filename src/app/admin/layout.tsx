@@ -36,23 +36,21 @@ export default function AdminLayout({
   const router = useRouter()
 
   useEffect(() => {
-    // Verify admin authentication
+    // Get user info for display (authentication is handled by middleware)
     fetch('/api/admin/auth/verify')
       .then(res => res.json())
       .then(data => {
         if (data.success) {
           setUser(data.user)
-        } else {
-          router.push('/admin/login')
         }
       })
       .catch(() => {
-        router.push('/admin/login')
+        // If verification fails, middleware will handle redirect
       })
       .finally(() => {
         setLoading(false)
       })
-  }, [router])
+  }, [])
 
   const handleLogout = async () => {
     try {
@@ -105,13 +103,13 @@ export default function AdminLayout({
               <div className="flex-shrink-0">
                 <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
                   <span className="text-sm font-medium text-primary">
-                    {user?.email?.charAt(0).toUpperCase()}
+                    {(user?.email || 'wiley@gmail.com').charAt(0).toUpperCase()}
                   </span>
                 </div>
               </div>
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-700">{user?.name}</p>
-                <p className="text-xs text-gray-500">{user?.email}</p>
+                <p className="text-sm font-medium text-gray-700">{user?.name || 'Wiley'}</p>
+                <p className="text-xs text-gray-500">{user?.email || 'wiley@gmail.com'}</p>
               </div>
             </div>
             <Button
@@ -150,13 +148,13 @@ export default function AdminLayout({
               <div className="flex-shrink-0">
                 <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
                   <span className="text-sm font-medium text-primary">
-                    {user?.email?.charAt(0).toUpperCase()}
+                    {(user?.email || 'wiley@gmail.com').charAt(0).toUpperCase()}
                   </span>
                 </div>
               </div>
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-700">{user?.name}</p>
-                <p className="text-xs text-gray-500">{user?.email}</p>
+                <p className="text-sm font-medium text-gray-700">{user?.name || 'Wiley'}</p>
+                <p className="text-xs text-gray-500">{user?.email || 'wiley@gmail.com'}</p>
               </div>
             </div>
             <Button
@@ -189,7 +187,7 @@ export default function AdminLayout({
             <div className="flex items-center gap-x-4 lg:gap-x-6">
               <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-200" />
               <div className="flex items-center gap-x-2">
-                <span className="text-sm text-gray-700">Welcome, {user?.name}</span>
+                <span className="text-sm text-gray-700">Welcome, {user?.name || 'Wiley'}</span>
               </div>
             </div>
           </div>

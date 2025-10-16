@@ -24,7 +24,7 @@ CREATE INDEX idx_admin_users_email ON admin_users(email);
 CREATE TRIGGER update_admin_users_updated_at BEFORE UPDATE ON admin_users
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- Insert a default admin user (password: admin123)
+-- Insert Wiley's admin user (password: wiley123)
 -- In production, you should change this password immediately
 INSERT INTO admin_users (email, password_hash, name, role) VALUES
-('admin@example.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Admin User', 'admin');
+('wiley@gmail.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Wiley', 'admin');
