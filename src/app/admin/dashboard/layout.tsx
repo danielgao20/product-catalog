@@ -17,7 +17,7 @@ import {
 } from 'lucide-react'
 
 const navigation = [
-  { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+  { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
   { name: 'Products', href: '/admin/products', icon: Package },
   { name: 'Bundles', href: '/admin/bundles', icon: ShoppingCart },
   { name: 'Inventory', href: '/admin/inventory', icon: BarChart3 },
@@ -31,7 +31,7 @@ export default function AdminDashboardLayout({
   children: React.ReactNode
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<{ id: string; email: string; name: string; role: string } | null>(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
 

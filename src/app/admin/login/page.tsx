@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -14,7 +13,6 @@ export default function AdminLogin() {
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-  const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -33,14 +31,16 @@ export default function AdminLogin() {
       const data = await response.json()
       console.log('Login response:', data)
 
-      if (data.success) {
-        console.log('Login successful, redirecting to dashboard...')
-        // Use window.location for more reliable redirect
-        window.location.href = '/admin/dashboard'
-      } else {
-        setError(data.error || 'Login failed')
-      }
-    } catch (error) {
+          if (data.success) {
+            console.log('Login successful, redirecting to dashboard...')
+            // Add a small delay to ensure cookie is set
+            setTimeout(() => {
+              window.location.href = '/admin'
+            }, 100)
+          } else {
+            setError(data.error || 'Login failed')
+          }
+    } catch {
       setError('An error occurred during login')
     } finally {
       setIsLoading(false)
