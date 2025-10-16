@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase'
 import { verifyToken } from '@/lib/admin-auth'
 
 export async function POST(request: NextRequest) {
@@ -41,8 +41,8 @@ export async function POST(request: NextRequest) {
     const fileExtension = file.name.split('.').pop()
     const fileName = `product-${timestamp}-${randomString}.${fileExtension}`
 
-    // Upload to Supabase storage
-    const { data, error } = await supabase.storage
+    // Upload to Supabase storage using admin client
+    const { data, error } = await supabaseAdmin.storage
       .from('product-images')
       .upload(fileName, file, {
         cacheControl: '3600',
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get public URL
-    const { data: urlData } = supabase.storage
+    const { data: urlData } = supabaseAdmin.storage
       .from('product-images')
       .getPublicUrl(fileName)
 
