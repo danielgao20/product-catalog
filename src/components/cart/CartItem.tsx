@@ -90,14 +90,16 @@ export function CartItem({ item }: CartItemProps) {
           </span>
         )}
         
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleRemove}
-          className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
+        {!isBundleItem && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleRemove}
+            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        )}
       </div>
     </div>
   )
