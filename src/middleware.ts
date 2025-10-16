@@ -2,8 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken } from '@/lib/admin-auth'
 
 export function middleware(request: NextRequest) {
-  // Only protect admin routes, but exclude login page
-  if (request.nextUrl.pathname.startsWith('/admin') && !request.nextUrl.pathname.startsWith('/admin/login')) {
+  // Protect admin dashboard and other admin routes, but exclude login page
+  if (request.nextUrl.pathname.startsWith('/admin/dashboard') || 
+      (request.nextUrl.pathname.startsWith('/admin') && 
+       !request.nextUrl.pathname.startsWith('/admin/login'))) {
     const token = request.cookies.get('admin-token')?.value
 
     if (!token) {

@@ -33,7 +33,7 @@ export default function AdminLogin() {
       const data = await response.json()
 
       if (data.success) {
-        router.push('/admin')
+        router.push('/admin/dashboard')
       } else {
         setError(data.error || 'Login failed')
       }
