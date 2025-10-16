@@ -11,9 +11,14 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 })
 
 // Service role client for admin operations (bypasses RLS)
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+if (!serviceRoleKey) {
+  console.error('SUPABASE_SERVICE_ROLE_KEY is not set! Admin operations will fail.')
+}
+
 export const supabaseAdmin = createClient(
   supabaseUrl,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || supabaseAnonKey,
+  serviceRoleKey || supabaseAnonKey,
   {
     auth: {
       autoRefreshToken: false,

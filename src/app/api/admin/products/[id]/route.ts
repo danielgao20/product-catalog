@@ -1,14 +1,17 @@
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { supabase, supabaseAdmin } from '@/lib/supabase'
 import { verifyToken } from '@/lib/admin-auth'
 import { calculateBundleStock } from '@/lib/database'
 
 // PUT /api/admin/products/[id] - Update product
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Await params to get the id
+    const { id } = await params
+    
     // Verify admin authentication
     const token = request.headers.get('Cookie')?.split('; ').find(row => row.startsWith('admin-token='))?.split('=')[1]
     
@@ -23,7 +26,7 @@ export async function PUT(
 
     const productData = await request.json()
 
-    const { data: product, error } = await supabase
+    const { data: product, error } = await supabaseAdmin
       .from('products')
       .update({
         name: productData.name,
@@ -37,7 +40,7 @@ export async function PUT(
         stock_count: productData.stockCount || 0,
         updated_at: new Date().toISOString()
       })
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single()
 
@@ -79,9 +82,12 @@ export async function PUT(
 // DELETE /api/admin/products/[id] - Delete product
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Await params to get the id
+    const { id } = await params
+    
     // Verify admin authentication
     const token = request.headers.get('Cookie')?.split('; ').find(row => row.startsWith('admin-token='))?.split('=')[1]
     
@@ -94,21 +100,32 @@ export async function DELETE(
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
     }
 
-    // First, delete any bundle relationships
-    await supabase
+    // Check if we have the service role key
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.error('SUPABASE_SERVICE_ROLE_KEY is not configured!')
+      return NextResponse.json({ error: 'Server configuration error' }, { status: 500 })
+    }
+
+    // First, delete any bundle relationships using admin client
+    await supabaseAdmin
       .from('bundle_products')
       .delete()
-      .or(`bundle_id.eq.${params.id},child_product_id.eq.${params.id}`)
-
-    // Then delete the product
-    const { error } = await supabase
+      .or(`bundle_id.eq.${id},child_product_id.eq.${id}`)
+    
+    // Then delete the product using admin client
+    const { data: deleteData, error } = await supabaseAdmin
       .from('products')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
+      .select()
 
     if (error) {
       console.error('Error deleting product:', error)
       return NextResponse.json({ error: 'Failed to delete product' }, { status: 500 })
+    }
+
+    if (!deleteData || deleteData.length === 0) {
+      return NextResponse.json({ error: 'Product not found or already deleted' }, { status: 404 })
     }
 
     return NextResponse.json({ success: true }, { status: 200 })

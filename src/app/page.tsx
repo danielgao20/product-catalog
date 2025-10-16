@@ -27,6 +27,10 @@ export default function Home() {
     }
 
     loadProducts()
+    
+    // Refresh products every 30 seconds to catch any changes
+    const interval = setInterval(loadProducts, 30000)
+    return () => clearInterval(interval)
   }, [])
 
   const filteredProducts = products.filter(product => {

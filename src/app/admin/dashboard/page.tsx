@@ -26,7 +26,7 @@ export default function AdminDashboardPage() {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch('/api/admin/products')
+      const response = await fetch(`/api/admin/products?t=${Date.now()}`)
       const data = await response.json()
       if (data.success) {
         setProducts(data.products)
@@ -69,11 +69,15 @@ export default function AdminDashboardPage() {
       })
       
       const data = await response.json()
+      
       if (data.success) {
         await fetchProducts()
+      } else {
+        alert(`Failed to delete product: ${data.error}`)
       }
     } catch (error) {
       console.error('Error deleting product:', error)
+      alert('Failed to delete product. Please try again.')
     }
   }
 
@@ -274,26 +278,12 @@ export default function AdminDashboardPage() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {product.imageUrl && (
-                    <div className="aspect-video bg-gray-100 rounded-md overflow-hidden relative group">
+                    <div className="aspect-video bg-gray-100 rounded-md overflow-hidden">
                       <img 
                         src={product.imageUrl} 
                         alt={product.name}
                         className="w-full h-full object-cover"
                       />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              // TODO: Add image edit functionality
-                            }}
-                          >
-                            Edit Image
-                          </Button>
-                        </div>
-                      </div>
                     </div>
                   )}
                   <div className="space-y-2">

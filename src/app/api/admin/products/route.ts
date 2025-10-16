@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { supabase, supabaseAdmin } from '@/lib/supabase'
 import { verifyToken } from '@/lib/admin-auth'
 import { calculateBundleStock } from '@/lib/database'
 
@@ -18,7 +18,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
     }
 
-    const { data: products, error } = await supabase
+    const { data: products, error } = await supabaseAdmin
       .from('products')
       .select('*')
       .order('created_at', { ascending: false })
@@ -27,6 +27,7 @@ export async function GET(request: Request) {
       console.error('Error fetching products:', error)
       return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 })
     }
+
 
     // Map database fields to frontend interface and calculate bundle stock
     const mappedProducts = await Promise.all(products.map(async (product) => {
@@ -77,7 +78,7 @@ export async function POST(request: Request) {
 
     const productData = await request.json()
 
-    const { data: product, error } = await supabase
+    const { data: product, error } = await supabaseAdmin
       .from('products')
       .insert([{
         name: productData.name,
