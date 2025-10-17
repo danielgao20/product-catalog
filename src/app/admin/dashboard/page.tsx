@@ -418,14 +418,20 @@ function ProductForm({
       <div>
         <Label htmlFor="imageUrl">Product Image</Label>
         <div className="space-y-3">
-          <div className="flex gap-2">
+          {/* Image URL Input */}
+          <div>
             <Input
               id="imageUrl"
-              placeholder="Enter image URL"
+              placeholder="Paste an image URL (supports Unsplash)"
               value={formData.imageUrl}
               onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-              className="flex-1"
+              className="max-w-md"
             />
+          </div>
+
+          {/* Upload Section */}
+          <div className="text-sm font-normal text-gray-500 mb-2">Upload from your device:</div>
+          <div className="flex items-center gap-3">
             <input
               type="file"
               id="file-upload"
@@ -444,8 +450,11 @@ function ProductForm({
               onClick={() => document.getElementById('file-upload')?.click()}
               disabled={isUploading}
             >
-              {isUploading ? 'Uploading...' : 'Upload'}
+              {isUploading ? 'Uploading...' : 'Choose File'}
             </Button>
+            <span className="text-sm text-gray-500">
+              JPG, PNG, WebP (max 5MB)
+            </span>
           </div>
           
           {uploadError && (
@@ -456,7 +465,7 @@ function ProductForm({
           
           {formData.imageUrl && (
             <div className="relative">
-              <div className="aspect-video bg-gray-100 rounded-md overflow-hidden">
+              <div className="aspect-video bg-gray-100 rounded-md overflow-hidden max-w-sm">
                 <img 
                   src={formData.imageUrl} 
                   alt="Product preview"
@@ -474,9 +483,6 @@ function ProductForm({
               </Button>
             </div>
           )}
-          <div className="text-xs text-gray-500">
-            Upload an image file (JPG, PNG, WebP) or enter an image URL. Max file size: 5MB
-          </div>
         </div>
       </div>
 

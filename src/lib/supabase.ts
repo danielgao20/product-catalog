@@ -12,7 +12,9 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 
 // Service role client for admin operations (bypasses RLS)
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-if (!serviceRoleKey) {
+
+// Only check for service role key on server side
+if (typeof window === 'undefined' && !serviceRoleKey) {
   console.error('SUPABASE_SERVICE_ROLE_KEY is not set! Admin operations will fail.')
 }
 
