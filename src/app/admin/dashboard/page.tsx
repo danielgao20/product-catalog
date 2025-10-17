@@ -356,6 +356,7 @@ function ProductForm({
     features: product?.features?.join(', ') || ''
   })
   const [isUploading, setIsUploading] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
 
   const handleFileUpload = async (file: File) => {
@@ -385,12 +386,18 @@ function ProductForm({
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    onSave({
-      ...formData,
-      features: formData.features ? formData.features.split(',').map(f => f.trim()) : []
-    })
+    setIsSubmitting(true)
+    
+    try {
+      await onSave({
+        ...formData,
+        features: formData.features ? formData.features.split(',').map(f => f.trim()) : []
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -411,8 +418,11 @@ function ProductForm({
             id="price"
             type="number"
             step="0.01"
-            value={formData.price}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
+            value={formData.price || ''}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              const value = e.target.value
+              setFormData({ ...formData, price: value === '' ? 0 : parseFloat(value) || 0 })
+            }}
             required
           />
         </div>
@@ -457,14 +467,21 @@ function ProductForm({
               }}
               className="hidden"
             />
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => document.getElementById('file-upload')?.click()}
-              disabled={isUploading}
-            >
-              {isUploading ? 'Uploading...' : 'Choose File'}
-            </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => document.getElementById('file-upload')?.click()}
+                disabled={isUploading || isSubmitting}
+              >
+                {isUploading ? (
+                  <>
+                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    Uploading...
+                  </>
+                ) : (
+                  'Choose File'
+                )}
+              </Button>
             <span className="text-sm text-gray-500">
               JPG, PNG, WebP (max 5MB)
             </span>
@@ -505,8 +522,11 @@ function ProductForm({
           <Input
             id="stockCount"
             type="number"
-            value={formData.stockCount}
-            onChange={(e) => setFormData({ ...formData, stockCount: parseInt(e.target.value) })}
+            value={formData.stockCount || ''}
+            onChange={(e) => {
+              const value = e.target.value
+              setFormData({ ...formData, stockCount: value === '' ? 0 : parseInt(value) || 0 })
+            }}
           />
         </div>
         <div className="flex items-center space-x-2 pt-6">
@@ -542,11 +562,26 @@ function ProductForm({
       </div>
 
       <div className="flex justify-end gap-2 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
+        <Button 
+          type="button" 
+          variant="outline" 
+          onClick={onCancel}
+          disabled={isSubmitting}
+        >
           Cancel
         </Button>
-        <Button type="submit">
-          {product ? 'Update Product' : 'Create Product'}
+        <Button 
+          type="submit" 
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <>
+              <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              {product ? 'Updating...' : 'Creating...'}
+            </>
+          ) : (
+            product ? 'Update Product' : 'Create Product'
+          )}
         </Button>
       </div>
     </form>
