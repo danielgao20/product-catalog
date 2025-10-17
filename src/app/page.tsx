@@ -60,7 +60,7 @@ export default function Home() {
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center space-x-2">
               <Package className="h-6 w-6" />
-              <h1 className="text-xl font-semibold">Wiley's Store</h1>
+              <h1 className="text-xl font-semibold">Wiley&apos;s Store</h1>
             </div>
             <CartSidebar />
           </div>

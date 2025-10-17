@@ -58,6 +58,7 @@ export async function verifyAdminCredentials(credentials: LoginCredentials): Pro
     )
 
     // Remove password hash from response
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password_hash, ...userWithoutPassword } = adminUser
 
     return {
@@ -72,11 +73,11 @@ export async function verifyAdminCredentials(credentials: LoginCredentials): Pro
 }
 
 // Verify JWT token
-export function verifyToken(token: string): { valid: boolean; payload?: any; error?: string } {
+export function verifyToken(token: string): { valid: boolean; payload?: { id: string; email: string; name: string; role: string }; error?: string } {
   try {
-    const payload = jwt.verify(token, JWT_SECRET)
+    const payload = jwt.verify(token, JWT_SECRET) as { id: string; email: string; name: string; role: string }
     return { valid: true, payload }
-  } catch (error) {
+  } catch {
     return { valid: false, error: 'Invalid token' }
   }
 }
@@ -111,6 +112,7 @@ export async function createAdminUser(userData: {
       return { success: false, error: error.message }
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password_hash, ...userWithoutPassword } = data
     return { success: true, user: userWithoutPassword as AdminUser }
   } catch (error) {

@@ -36,7 +36,7 @@ export function BundleCard({ product }: BundleCardProps) {
   }
 
   // Get child products for this bundle
-  const [childProducts, setChildProducts] = useState<any[]>([])
+  const [childProducts, setChildProducts] = useState<{child_product: Product, quantity_ratio: number}[]>([])
 
   useEffect(() => {
     getBundleProducts(product.id).then(setChildProducts)
@@ -117,11 +117,11 @@ export function BundleCard({ product }: BundleCardProps) {
           <CollapsibleContent className="mt-2">
             <div className="space-y-2">
               {childProducts.map((child) => (
-                <div key={child?.id} className="flex items-center justify-between rounded-lg border p-3 text-sm">
+                <div key={child?.child_product?.id} className="flex items-center justify-between rounded-lg border p-3 text-sm">
                   <div className="flex items-center space-x-3">
                     <div className="relative h-8 w-8 overflow-hidden rounded">
                       <Image
-                        src={child?.child_product?.image_url || '/placeholder-product.jpg'}
+                        src={child?.child_product?.imageUrl || '/placeholder-product.jpg'}
                         alt={child?.child_product?.name || ''}
                         fill
                         className="object-cover"

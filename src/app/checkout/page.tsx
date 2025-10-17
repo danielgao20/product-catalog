@@ -202,7 +202,7 @@ export default function CheckoutPage() {
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Try entering "FREE" to get your items for free!
+                      Try entering &quot;FREE&quot; to get your items for free!
                     </p>
                   </div>
 

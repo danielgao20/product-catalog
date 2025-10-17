@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { supabase, supabaseAdmin } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase'
 import { getBundleProducts } from '@/lib/database'
 
 // POST /api/products/update-stock - Update product stock after purchase
