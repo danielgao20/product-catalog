@@ -91,7 +91,24 @@ export async function getBundleProducts(bundleId: string) {
     return []
   }
 
-  return data
+  // Transform the data to match frontend expectations
+  return data.map(item => ({
+    ...item,
+    child_product: item.child_product ? {
+      id: item.child_product.id,
+      name: item.child_product.name,
+      description: item.child_product.description,
+      price: item.child_product.price,
+      imageUrl: item.child_product.image_url,
+      isBundle: item.child_product.is_bundle,
+      createdAt: new Date(item.child_product.created_at),
+      updatedAt: new Date(item.child_product.updated_at),
+      details: item.child_product.details,
+      features: item.child_product.features,
+      inStock: item.child_product.in_stock,
+      stockCount: item.child_product.stock_count,
+    } : null
+  }))
 }
 
 // Calculate bundle stock based on minimum stock of child products
