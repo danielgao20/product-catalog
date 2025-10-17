@@ -122,7 +122,7 @@ export async function calculateBundleStock(bundleId: string): Promise<number> {
   // Calculate the minimum stock considering quantity ratios
   const minStock = Math.min(
     ...bundleProducts.map(bp => {
-      const childStock = bp.child_product?.stock_count || 0
+      const childStock = bp.child_product?.stockCount || 0
       const ratio = bp.quantity_ratio || 1
       return Math.floor(childStock / ratio)
     })

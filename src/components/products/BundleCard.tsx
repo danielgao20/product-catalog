@@ -39,7 +39,10 @@ export function BundleCard({ product }: BundleCardProps) {
   const [childProducts, setChildProducts] = useState<{child_product: Product, quantity_ratio: number}[]>([])
 
   useEffect(() => {
-    getBundleProducts(product.id).then(setChildProducts)
+    getBundleProducts(product.id).then((data) => {
+      console.log('Bundle products data:', data)
+      setChildProducts(data)
+    })
   }, [product.id])
 
   const bundleSubtotal = childProducts.reduce((total, child) => {
@@ -126,6 +129,10 @@ export function BundleCard({ product }: BundleCardProps) {
                         fill
                         className="object-cover"
                         sizes="32px"
+                        onError={(e) => {
+                          console.log('Image failed to load:', child?.child_product?.imageUrl)
+                          console.log('Child product:', child?.child_product)
+                        }}
                       />
                     </div>
                     <span className="font-medium">{child?.child_product?.name}</span>
