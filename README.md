@@ -1,50 +1,38 @@
 # Product Catalog & Cart System
 
-A modern, full-stack e-commerce application built with Next.js, React, TypeScript, and Supabase. Features a complete product catalog with bundle support, shopping cart functionality, and real-time database integration.
+A modern e-commerce application built with Next.js, React, TypeScript, and Supabase. Features a product catalog with bundle support, shopping cart functionality, and admin dashboard.
 
-## 🚀 Features
+## Features
 
-### Core Functionality
-- **Product Catalog**: Browse individual products and product bundles
-- **Shopping Cart**: Add, remove, and manage cart items with persistent storage
-- **Bundle Support**: Create and manage product bundles with child products
-- **Quantity Management**: Proportional scaling for bundle quantities
-- **Real-time Updates**: Live cart updates with Supabase integration
+- **Product Catalog**: Browse individual products and bundles
+- **Shopping Cart**: Add, remove, and manage cart items
+- **Bundle Support**: Create and manage product bundles
+- **Admin Dashboard**: Product management with authentication
+- **Real-time Updates**: Live cart updates with Supabase
 
-### Technical Features
-- **Modern UI**: Clean, responsive design with shadcn/ui components
-- **Type Safety**: Full TypeScript implementation
-- **Database Integration**: Supabase PostgreSQL with Row Level Security
-- **Session Management**: Guest cart persistence with session IDs
-- **Image Optimization**: Next.js Image component with Unsplash integration
+## Tech Stack
 
-## 🛠️ Tech Stack
-
-- **Frontend**: Next.js 14, React 18, TypeScript
-- **Styling**: Tailwind CSS, shadcn/ui components
+- **Frontend**: Next.js 15, React 19, TypeScript
+- **Styling**: Tailwind CSS, shadcn/ui
 - **Database**: Supabase (PostgreSQL)
-- **Authentication**: Supabase Auth (ready for implementation)
-- **Deployment**: Vercel-ready
+- **Authentication**: Custom JWT for admin
+- **Deployment**: Vercel
 
-## 📦 Installation
+## Quick Start
 
-1. **Clone the repository**
+1. **Clone and install**
    ```bash
    git clone <repository-url>
    cd product-catalog
-   ```
-
-2. **Install dependencies**
-   ```bash
    npm install
    ```
 
-3. **Set up environment variables**
+2. **Set up environment**
    ```bash
    cp env.template .env.local
    ```
    
-   Update `.env.local` with your Supabase credentials:
+   Add your Supabase credentials to `.env.local`:
    ```env
    NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
@@ -52,137 +40,61 @@ A modern, full-stack e-commerce application built with Next.js, React, TypeScrip
    JWT_SECRET=your_jwt_secret
    ```
 
-4. **Set up the database**
-   - Create a new Supabase project
-   - Run the SQL scripts in the `scripts/` folder in order:
-     ```bash
-   # 1. Core database schema
-   # Run scripts/database-schema.sql in Supabase SQL Editor
+3. **Set up database**
    
-   # 2. Sample data
-   # Run scripts/sample-data.sql in Supabase SQL Editor
-   
-   # 3. Admin authentication
-   # Run scripts/admin-schema.sql in Supabase SQL Editor
-   
-   # 4. File storage setup
-   # Run scripts/supabase-storage-setup.sql in Supabase SQL Editor
-   ```
-   
-   See `scripts/README.md` for detailed setup instructions.
+   Run the SQL scripts in `scripts/` folder in order:
+   - `database-schema.sql` - Core database structure
+   - `sample-data.sql` - Initial data
+   - `admin-schema.sql` - Admin authentication
+   - `supabase-storage-setup.sql` - File storage
 
-5. **Start the development server**
+4. **Start development server**
    ```bash
    npm run dev
    ```
 
-   Open [http://localhost:3000](http://localhost:3000) to view the application.
+   Open [http://localhost:3000](http://localhost:3000)
 
-## 🗄️ Database Schema
+## Admin Access
 
-### Products Table
-- Individual products and bundles
-- Supports images, pricing, and inventory tracking
-- Bundle flag for product grouping
+Default admin credentials:
+- **Email**: `wiley@gmail.com`
+- **Password**: `wiley123`
 
-### Bundle Products Table
-- Links bundles to their child products
-- Quantity ratios for proportional scaling
-- Flexible bundle composition
+Access admin dashboard at `/admin/login`
 
-### Cart Items Table
-- Session-based cart storage
-- Supports both individual and bundle items
-- Guest user support with session IDs
+## Project Structure
 
-## 🎯 Usage
-
-### Adding Products to Cart
-- Click "Add to Cart" on any product card
-- Use the product detail dialog for quantity selection
-- Bundle items automatically include child products
-
-### Managing Cart
-- View cart via the cart button in the header
-- Update quantities with +/- buttons
-- Remove items or clear entire cart
-- Bundle quantities scale child products proportionally
-
-### Bundle Functionality
-- Bundles show individual item breakdown
-- Displays bundle savings vs individual pricing
-- Expandable view to see included items
-
-## 🔧 Development
-
-### Project Structure
 ```
 src/
-├── app/                 # Next.js app router pages
-├── components/          # React components
-│   ├── cart/           # Cart-related components
-│   ├── products/       # Product display components
-│   └── ui/             # shadcn/ui components
-├── context/            # React context providers
-└── lib/                # Utility functions and types
-    ├── database.ts     # Supabase database functions
-    ├── supabase.ts     # Supabase client configuration
-    ├── types.ts        # TypeScript type definitions
-    └── utils.ts        # Helper functions
+├── app/                    # Next.js App Router
+│   ├── admin/             # Admin dashboard
+│   └── api/               # API routes
+├── components/            # UI components
+│   ├── cart/             # Cart components
+│   ├── products/         # Product components
+│   └── ui/               # shadcn/ui components
+├── context/              # React Context
+├── lib/                  # Utilities
+└── middleware.ts         # Route protection
 ```
 
-### Key Components
-- **CartContext**: Manages cart state and operations
-- **ProductGrid**: Displays product catalog
-- **BundleCard**: Specialized bundle product display
-- **CartSidebar**: Shopping cart interface
+## Deployment
 
-### Database Functions
-- `getProducts()`: Fetch all products
-- `getBundleProducts()`: Get bundle child products
-- `addToCart()`: Add items to cart with quantity handling
-- `updateCartItemQuantity()`: Update item quantities
-- `getCartItems()`: Retrieve user's cart items
+Deploy to Vercel:
 
-## 🚀 Deployment
+1. Push to GitHub
+2. Connect repository to Vercel
+3. Add environment variables
+4. Deploy
 
-### Vercel Deployment
-1. Connect your GitHub repository to Vercel
-2. Set environment variables in Vercel dashboard
-3. Deploy automatically on push to main branch
-
-### Environment Variables
-- `NEXT_PUBLIC_SUPABASE_URL`: Your Supabase project URL
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Your Supabase anonymous key
-
-## 📝 API Reference
-
-### Cart Operations
-- `addToCart(product, quantity)`: Add product to cart
-- `removeFromCart(productId)`: Remove product from cart
-- `updateQuantity(productId, quantity)`: Update product quantity
-- `clearCart()`: Clear all cart items
-
-### Product Operations
-- `getProducts()`: Fetch all products
-- `getProductById(id)`: Get specific product
-- `getBundleProducts(bundleId)`: Get bundle contents
-
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
 
-## 📄 License
+## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- [Next.js](https://nextjs.org/) for the React framework
-- [Supabase](https://supabase.com/) for the backend infrastructure
-- [shadcn/ui](https://ui.shadcn.com/) for the UI components
-- [Tailwind CSS](https://tailwindcss.com/) for styling
+MIT
