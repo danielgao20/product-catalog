@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { CartItem } from './CartItem'
 import { ShoppingCart, ShoppingBag } from 'lucide-react'
+import Link from 'next/link'
 
 export function CartSidebar() {
   const { cart, isOpen, setIsOpen, clearCart } = useCart()
@@ -78,9 +79,11 @@ export function CartSidebar() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Button className="w-full" size="lg">
-                    Checkout
-                  </Button>
+                  <Link href="/checkout" className="block">
+                    <Button className="w-full" size="lg" onClick={() => setIsOpen(false)}>
+                      Checkout
+                    </Button>
+                  </Link>
                   
                   <Button 
                     variant="outline" 

@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Plus, Edit, Trash2, Package, DollarSign, Hash, Search } from 'lucide-react'
 import { Product } from '@/lib/types'
+import { eventManager, EVENTS } from '@/lib/events'
 
 export default function AdminDashboardPage() {
   const [products, setProducts] = useState<Product[]>([])
@@ -22,6 +23,18 @@ export default function AdminDashboardPage() {
 
   useEffect(() => {
     fetchProducts()
+    
+    // Listen for stock update events
+    const handleStockUpdate = () => {
+      fetchProducts()
+    }
+    
+    eventManager.on(EVENTS.STOCK_UPDATED, handleStockUpdate)
+    
+    // Cleanup event listener
+    return () => {
+      eventManager.off(EVENTS.STOCK_UPDATED, handleStockUpdate)
+    }
   }, [])
 
   const fetchProducts = async () => {

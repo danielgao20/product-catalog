@@ -4,6 +4,7 @@ import { ProductGrid } from '@/components/products/ProductGrid'
 import { CartSidebar } from '@/components/cart/CartSidebar'
 import { getProducts } from '@/lib/database'
 import { Product } from '@/lib/types'
+import { eventManager, EVENTS } from '@/lib/events'
 import { useState, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 import { Search, Package } from 'lucide-react'
@@ -28,9 +29,20 @@ export default function Home() {
 
     loadProducts()
     
+    // Listen for stock update events
+    const handleStockUpdate = () => {
+      loadProducts()
+    }
+    
+    eventManager.on(EVENTS.STOCK_UPDATED, handleStockUpdate)
+    
     // Refresh products every 30 seconds to catch any changes
     const interval = setInterval(loadProducts, 30000)
-    return () => clearInterval(interval)
+    
+    return () => {
+      eventManager.off(EVENTS.STOCK_UPDATED, handleStockUpdate)
+      clearInterval(interval)
+    }
   }, [])
 
   const filteredProducts = products.filter(product => {
